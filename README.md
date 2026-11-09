@@ -85,7 +85,10 @@ Use the result's `user_id` as `lawyer_id` when creating an appointment;
 
 Apply the current Alembic head before serving booking endpoints. Lawyer
 availability uses ISO weekdays (`0` = Monday, `6` = Sunday) and Asia/Karachi
-local times. New consultations last 60 minutes.
+local times. The `tzdata` dependency supplies IANA rules on platforms such as
+Windows that do not provide a system timezone database. If those rules are
+unavailable, booking calculations log a warning and fall back to fixed UTC+05:00.
+New consultations last 60 minutes.
 
 - Lawyers manage recurring slots at `POST /availability`,
   `GET /availability/me`, `PUT /availability/{id}`, and

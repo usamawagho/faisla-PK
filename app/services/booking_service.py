@@ -1,7 +1,8 @@
-from datetime import date, datetime, time, timedelta
+import logging
+from datetime import date, datetime, time, timedelta, timezone
 from typing import Any
 from uuid import UUID
-from zoneinfo import ZoneInfo
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
@@ -16,7 +17,21 @@ from app.models.user import (
 from app.repositories.booking_repository import BookingRepository
 from app.services.notification_service import NotificationService
 
-PAKISTAN_TIMEZONE = ZoneInfo("Asia/Karachi")
+logger = logging.getLogger(__name__)
+
+
+def _load_pakistan_timezone() -> timezone | ZoneInfo:
+    try:
+        return ZoneInfo("Asia/Karachi")
+    except ZoneInfoNotFoundError:
+        logger.warning(
+            "IANA timezone data is unavailable; using fixed UTC+05:00 for "
+            "Pakistan Standard Time. Install tzdata for Asia/Karachi rules."
+        )
+        return timezone(timedelta(hours=5), name="PKT")
+
+
+PAKISTAN_TIMEZONE = _load_pakistan_timezone()
 APPOINTMENT_DURATION = timedelta(minutes=60)
 
 

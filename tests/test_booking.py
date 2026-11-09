@@ -1,5 +1,7 @@
 import unittest
 from datetime import date, time, timedelta
+from unittest.mock import patch
+from zoneinfo import ZoneInfoNotFoundError
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
@@ -22,6 +24,18 @@ from app.services.booking_service import (
     BookingService,
     BookingValidationError,
 )
+from app.services.booking_service import _load_pakistan_timezone
+
+
+class PakistanTimezoneTests(unittest.TestCase):
+    def test_timezone_lookup_falls_back_to_fixed_utc_plus_five(self) -> None:
+        with patch(
+            "app.services.booking_service.ZoneInfo",
+            side_effect=ZoneInfoNotFoundError("Asia/Karachi"),
+        ):
+            pakistan_timezone = _load_pakistan_timezone()
+
+        self.assertEqual(pakistan_timezone.utcoffset(None), timedelta(hours=5))
 
 
 class BookingTests(unittest.TestCase):
