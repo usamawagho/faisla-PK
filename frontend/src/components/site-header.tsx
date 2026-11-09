@@ -13,6 +13,19 @@ const publicLinks = [
   { href: "/lawyers", label: "Find a lawyer" },
 ];
 
+const workspaceLinks = {
+  client: [
+    { href: "/dashboard/appointments", label: "Appointments" },
+    { href: "/dashboard/cases", label: "Cases" },
+    { href: "/dashboard/documents", label: "Documents" },
+  ],
+  lawyer: [
+    { href: "/lawyer/appointments", label: "Appointments" },
+    { href: "/dashboard/cases", label: "Cases" },
+    { href: "/dashboard/documents", label: "Documents" },
+  ],
+} as const;
+
 export function SiteHeader() {
   const pathname = usePathname();
   const router = useRouter();
@@ -22,12 +35,13 @@ export function SiteHeader() {
 
   const notifications = useQuery({
     queryKey: ["notifications", user?.id],
-    enabled: Boolean(user),
+    enabled: Boolean(user) && !pathname.startsWith("/admin"),
     queryFn: async () => (await api.get<Notification[]>("/notifications?limit=100")).data,
   });
   const unreadCount = notifications.data?.filter((item) => !item.is_read).length ?? 0;
 
   useEffect(() => {
+    if (pathname.startsWith("/admin")) return;
     let active = true;
     api
       .get<User>("/auth/me")
@@ -55,6 +69,8 @@ export function SiteHeader() {
     }
   }
 
+  if (pathname.startsWith("/admin")) return null;
+
   return (
     <header className="site-header">
       <div className="header-inner">
@@ -74,7 +90,16 @@ export function SiteHeader() {
           ))}
           {user ? (
             <>
-              <Link className="nav-dashboard" href="/dashboard">Dashboard</Link>
+              {user.role !== "admin" &&
+                workspaceLinks[user.role].map((link) => (
+                  <Link href={link.href} key={link.href}>{link.label}</Link>
+                ))}
+              <Link
+                className="nav-dashboard"
+                href={user.role === "lawyer" ? "/portal" : user.role === "admin" ? "/admin/dashboard" : "/dashboard"}
+              >
+                {user.role === "lawyer" ? "Portal" : "Dashboard"}
+              </Link>
               <Link href="/dashboard/notifications" aria-label={unreadCount ? `${unreadCount} unread notifications` : "Notifications"}>
                 Notifications{unreadCount > 0 ? ` (${unreadCount})` : ""}
               </Link>
@@ -90,5 +115,20 @@ export function SiteHeader() {
       </div>
       {error && <div className="header-error" role="alert">{error}</div>}
     </header>
+  );
+}
+
+export function SiteFooter() {
+  const pathname = usePathname();
+  if (pathname.startsWith("/admin")) return null;
+
+  return (
+    <footer className="site-footer">
+      <div className="footer-inner">
+        <span className="footer-brand">faisla.pk</span>
+        <span>Legal support, made more accessible.</span>
+        <span>© {new Date().getFullYear()} Faisla PK</span>
+      </div>
+    </footer>
   );
 }

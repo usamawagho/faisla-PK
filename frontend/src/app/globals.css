@@ -514,28 +514,255 @@ a {
 }
 
 .auth-card {
-  width: min(100%, 465px);
-  padding: 36px;
+  width: min(100%, 560px);
+  padding: 38px;
   box-shadow: var(--card-shadow);
 }
 
 .auth-card h1 {
-  margin: 5px 0 8px;
+  margin: 7px 0 8px;
   font-family: Georgia, serif;
-  font-size: 35px;
+  font-size: clamp(29px, 4vw, 35px);
   font-weight: 500;
   letter-spacing: -1px;
+  line-height: 1.2;
 }
 
-.auth-card > p {
+.auth-card .auth-description {
   margin: 0 0 24px;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .form-stack {
   display: grid;
   gap: 15px;
+}
+
+.registration-card {
+  border-radius: 14px;
+}
+
+.registration-progress {
+  margin: 0 0 25px;
+}
+
+.registration-progress ol {
+  position: relative;
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.registration-progress ol::before {
+  position: absolute;
+  top: 14px;
+  right: 16.5%;
+  left: 16.5%;
+  height: 1px;
+  background: var(--line);
+  content: "";
+}
+
+.progress-step {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 7px;
+  color: #78817d;
+  font-size: 11px;
+  text-align: center;
+}
+
+.progress-marker {
+  z-index: 1;
+  display: grid;
+  width: 29px;
+  height: 29px;
+  place-items: center;
+  border: 1px solid #dfe5df;
+  border-radius: 50%;
+  background: #fff;
+  color: #6f7974;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.progress-step.is-complete .progress-marker {
+  border-color: var(--forest);
+  background: var(--forest);
+  color: #fff;
+}
+
+.progress-step[aria-current="step"] .progress-label {
+  color: var(--forest);
+  font-weight: 700;
+}
+
+.registration-progress > p {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 11px;
+  text-align: right;
+}
+
+.account-type-field {
+  display: grid;
+  min-width: 0;
+  gap: 8px;
+  margin: 0;
+  border: 0;
+  padding: 0;
+}
+
+.account-type-field legend {
+  margin-bottom: 8px;
+  color: #293630;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.account-type-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.account-type-option {
+  display: flex;
+  min-height: 48px;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  border: 1px solid #d7dfd9;
+  border-radius: 8px;
+  background: #fff;
+  color: #35413c;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 650;
+  transition: background 150ms ease, border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.account-type-option:hover {
+  border-color: #8eaa99;
+  background: #f8fbf8;
+}
+
+.account-type-option.is-selected {
+  border-color: var(--forest);
+  background: #f0f6f1;
+  box-shadow: inset 0 0 0 1px var(--forest);
+  color: var(--forest);
+}
+
+.account-type-option:focus-visible {
+  outline: 2px solid #428061;
+  outline-offset: 2px;
+}
+
+.portal-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin: -7px 0 23px;
+}
+
+.portal-badges span {
+  display: inline-flex;
+  min-height: 33px;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid #e0e8e1;
+  border-radius: 999px;
+  padding: 0 12px;
+  background: #f7faf7;
+  color: #355342;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.portal-badges span span {
+  min-height: auto;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--forest);
+  font-size: 14px;
+}
+
+.admin-login-card {
+  border-top: 3px solid var(--forest);
+}
+
+.admin-layout {
+  display: grid;
+  min-height: 100vh;
+  grid-template-columns: 238px minmax(0, 1fr);
+  background: #f7f8f6;
+}
+
+.admin-sidebar {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+  border-right: 1px solid var(--line);
+  padding: 27px 18px;
+  background: #fff;
+}
+
+.admin-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--ink);
+  font-size: 17px;
+  font-weight: 750;
+}
+
+.admin-brand .brand-mark {
+  flex: 0 0 auto;
+}
+
+.admin-sidebar > p {
+  margin: 36px 10px 12px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.admin-sidebar nav {
+  display: grid;
+  gap: 5px;
+}
+
+.admin-nav-link {
+  border-radius: 7px;
+  padding: 10px 12px;
+  color: #4b5651;
+  font-size: 13px;
+  font-weight: 600;
+  transition: background 150ms ease, color 150ms ease;
+}
+
+.admin-nav-link:hover,
+.admin-nav-link.is-active {
+  background: #eef5f0;
+  color: var(--forest);
+}
+
+.admin-content {
+  min-width: 0;
+}
+
+.admin-content > .page-shell {
+  width: min(1160px, calc(100% - 64px));
+  margin: 0 auto;
+  padding: 42px 0 24px;
 }
 
 .form-grid {
@@ -544,6 +771,118 @@ a {
   gap: 13px;
 }
 
+.registration-card .form-stack {
+  gap: 16px;
+}
+
+.registration-card .field {
+  gap: 7px;
+}
+
+.registration-card .field label {
+  color: #293630;
+  font-size: 13px;
+}
+
+.registration-card .field input,
+.registration-card .field select {
+  min-height: 48px;
+  border-color: #d7dfd9;
+  border-radius: 8px;
+  padding: 0 14px;
+  font-size: 14px;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.registration-card .field textarea {
+  border-color: #d7dfd9;
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 14px;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.registration-card .field input:focus,
+.registration-card .field select:focus,
+.registration-card .field textarea:focus {
+  border-color: #428061;
+  box-shadow: 0 0 0 3px rgba(23, 75, 59, 0.12);
+}
+
+.registration-card .field input:focus-visible,
+.registration-card .field select:focus-visible,
+.registration-card .field textarea:focus-visible,
+.registration-card .button:focus-visible {
+  outline: 2px solid #428061;
+  outline-offset: 2px;
+}
+
+.registration-card .button {
+  min-height: 49px;
+  border-radius: 8px;
+  transition: background 150ms ease, box-shadow 150ms ease, transform 150ms ease;
+}
+
+.registration-card .auth-submit {
+  flex: 1;
+  box-shadow: 0 5px 14px rgba(23, 75, 59, 0.16);
+}
+
+.registration-card .auth-submit:hover:not(:disabled) {
+  box-shadow: 0 8px 18px rgba(23, 75, 59, 0.2);
+  transform: translateY(-1px);
+}
+
+.registration-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 2px;
+}
+
+.registration-actions > .button:only-child {
+  width: 100%;
+}
+
+.password-requirements {
+  display: grid;
+  gap: 5px;
+  margin: 2px 0 0;
+  padding: 0;
+  color: var(--muted);
+  font-size: 12px;
+  list-style: none;
+}
+
+.password-requirements li {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.password-requirements .requirement-met {
+  color: var(--forest);
+}
+
+.field-error {
+  color: #912b18;
+  font-size: 12px;
+}
+
+.auth-card .auth-switch {
+  margin: 21px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  text-align: center;
+}
+
+.auth-switch a {
+  color: var(--forest);
+  font-weight: 700;
+}
+
+.auth-switch a:hover {
+  text-decoration: underline;
+}
 .field {
   display: grid;
   gap: 6px;
@@ -1257,6 +1596,46 @@ a {
 
   .auth-card {
     padding: 26px 21px;
+  }
+
+  .admin-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-sidebar {
+    min-height: auto;
+    gap: 12px;
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+    padding: 15px 16px;
+  }
+
+  .admin-sidebar > p {
+    margin: 4px 2px 0;
+  }
+
+  .admin-sidebar nav {
+    display: flex;
+    overflow-x: auto;
+    gap: 5px;
+  }
+
+  .admin-nav-link {
+    flex: 0 0 auto;
+  }
+
+  .admin-content > .page-shell {
+    width: min(100% - 32px, 1160px);
+    padding-top: 30px;
+  }
+
+  .registration-card .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .progress-label {
+    max-width: 90px;
+    line-height: 1.3;
   }
 
   .form-grid,
