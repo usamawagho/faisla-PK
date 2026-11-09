@@ -4,6 +4,8 @@ export interface User {
   id: number;
   email: string;
   phone: string | null;
+  full_name: string | null;
+  city: string | null;
   role: UserRole;
   is_active: boolean;
 }

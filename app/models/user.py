@@ -79,6 +79,10 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String, unique=True, index=True, nullable=False)
     phone = Column(String, nullable=True)
+    full_name = Column(String(200), nullable=True)
+    cnic = Column(String(32), nullable=True)
+    city = Column(String(100), nullable=True)
+    address = Column(String(500), nullable=True)
     hashed_password = Column(String, nullable=False)
     role = Column(Enum(UserRole), nullable=False)
     is_active = Column(

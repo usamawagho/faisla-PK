@@ -39,6 +39,10 @@ def register_client(
     user = User(
         email=str(payload.email),
         phone=payload.phone,
+        full_name=payload.full_name,
+        cnic=payload.cnic,
+        city=payload.city,
+        address=payload.address,
         hashed_password=AuthService.hash_password(payload.password),
         role=UserRole.CLIENT,
     )
@@ -62,6 +66,8 @@ def register_lawyer(
         cnic=payload.cnic,
         specialization=payload.specialization,
         city=payload.city,
+        years_of_experience=payload.years_of_experience,
+        office_address=payload.office_address,
         verification_status=VerificationStatus.PENDING,
     )
     user = User(

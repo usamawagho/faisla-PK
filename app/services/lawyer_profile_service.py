@@ -47,6 +47,7 @@ class LawyerProfileService:
         self,
         *,
         city: str | None = None,
+        preferred_city: str | None = None,
         specialization: str | None = None,
         min_years_experience: int | None = None,
         max_years_experience: int | None = None,
@@ -57,6 +58,7 @@ class LawyerProfileService:
         return self.repository.search_public(
             self.db,
             city=city,
+            preferred_city=preferred_city,
             specialization=specialization,
             min_years_experience=min_years_experience,
             max_years_experience=max_years_experience,

@@ -9,7 +9,15 @@ from app.utils.password_validator import validate_password
 class RegistrationBase(BaseModel):
     email: EmailStr
     password: str = Field(min_length=8, max_length=128)
-    phone: str | None = Field(default=None, max_length=32)
+    phone: str = Field(min_length=1, max_length=32)
+
+    @field_validator("phone")
+    @classmethod
+    def normalize_phone(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise ValueError("Phone number must not be blank")
+        return value
 
     @field_validator("email")
     @classmethod
@@ -69,11 +77,25 @@ class LawyerProfileFields(BaseModel):
 
 
 class ClientRegisterRequest(RegistrationBase):
-    pass
+    full_name: str = Field(min_length=1, max_length=200)
+    cnic: str | None = Field(default=None, max_length=32)
+    city: str = Field(min_length=1, max_length=100)
+    address: str = Field(min_length=1, max_length=500)
+
+    @field_validator("full_name", "cnic", "city", "address")
+    @classmethod
+    def strip_client_text(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
+        value = value.strip()
+        if not value:
+            raise ValueError("Value must not be blank")
+        return value
 
 
 class LawyerRegisterRequest(RegistrationBase, LawyerProfileFields):
-    pass
+    specialization: str = Field(min_length=1, max_length=200)
+    office_address: str = Field(min_length=1, max_length=500)
 
 
 class UserResponse(BaseModel):
@@ -82,5 +104,7 @@ class UserResponse(BaseModel):
     id: int
     email: EmailStr
     phone: str | None
+    full_name: str | None = None
+    city: str | None = None
     role: UserRole
     is_active: bool

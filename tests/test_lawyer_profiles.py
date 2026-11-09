@@ -103,6 +103,7 @@ class LawyerProfileTests(unittest.TestCase):
     def test_registration_schema_requires_all_profile_fields(self) -> None:
         payload = LawyerRegisterRequest(
             email="LAWYER@EXAMPLE.COM",
+            phone="+923001234567",
             password="SecurePass1",
             **self.profile_values(),
         )
@@ -187,6 +188,42 @@ class LawyerProfileTests(unittest.TestCase):
             verification_status=VerificationStatus.PENDING,
         )
         self.assertEqual(rejected_filter, [])
+
+    def test_public_search_prioritizes_lawyers_in_preferred_city(self) -> None:
+        local_lawyer = self.add_user()
+        local_lawyer.lawyer_profile = LawyerProfile(
+            **{
+                **self.profile_values(),
+                "years_of_experience": 2,
+                "license_number": "LIC-LOCAL",
+                "bar_council_number": "BC-LOCAL",
+                "cnic": "4210112345674",
+                "city": "Lahore",
+            },
+            verification_status=VerificationStatus.APPROVED,
+        )
+        distant_lawyer = self.add_user()
+        distant_lawyer.lawyer_profile = LawyerProfile(
+            **{
+                **self.profile_values(),
+                "license_number": "LIC-DISTANT",
+                "bar_council_number": "BC-DISTANT",
+                "cnic": "4210112345675",
+                "city": "Karachi",
+            },
+            verification_status=VerificationStatus.APPROVED,
+        )
+        self.db.commit()
+
+        results = LawyerProfileRepository().search_public(
+            self.db,
+            preferred_city="lahore",
+        )
+
+        self.assertEqual(
+            [profile.user_id for profile in results],
+            [local_lawyer.id, distant_lawyer.id],
+        )
 
     def test_marketplace_response_does_not_expose_sensitive_identifiers(self) -> None:
         public_fields = set(LawyerMarketplaceResponse.model_fields)

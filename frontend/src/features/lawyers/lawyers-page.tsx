@@ -4,26 +4,31 @@ import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { type FormEvent, useState } from "react";
 import { api, getApiError } from "@/lib/api";
+import { useAuthStore } from "@/lib/auth-store";
 import type { Lawyer } from "@/types/api";
 
 interface SearchFilters {
   city?: string;
+  preferred_city?: string;
   specialization?: string;
   min_years_experience?: number;
 }
 
 export default function LawyersPage() {
+  const userCity = useAuthStore((state) => state.user?.city);
   const [city, setCity] = useState("");
+  const [preferredCity, setPreferredCity] = useState("");
   const [specialization, setSpecialization] = useState("");
   const [experience, setExperience] = useState("");
   const [filters, setFilters] = useState<SearchFilters>({});
 
   const lawyersQuery = useQuery({
-    queryKey: ["lawyers", filters],
+    queryKey: ["lawyers", filters, userCity],
     queryFn: async () => {
       const { data } = await api.get<Lawyer[]>("/lawyers", {
         params: {
           ...filters,
+          preferred_city: filters.preferred_city || userCity || undefined,
           limit: 30,
         },
       });
@@ -35,6 +40,7 @@ export default function LawyersPage() {
     event.preventDefault();
     setFilters({
       ...(city.trim() ? { city: city.trim() } : {}),
+      ...(preferredCity.trim() ? { preferred_city: preferredCity.trim() } : {}),
       ...(specialization.trim() ? { specialization: specialization.trim() } : {}),
       ...(experience ? { min_years_experience: Number(experience) } : {}),
     });
@@ -50,8 +56,18 @@ export default function LawyersPage() {
 
       <form className="search-panel" onSubmit={search}>
         <div className="field">
-          <label htmlFor="city">City</label>
-          <input id="city" onChange={(event) => setCity(event.target.value)} placeholder="e.g. Karachi" value={city} />
+          <label htmlFor="preferred_city">Your city (show nearby lawyers first)</label>
+          <input
+            autoComplete="address-level2"
+            id="preferred_city"
+            onChange={(event) => setPreferredCity(event.target.value)}
+            placeholder={userCity || "e.g. Karachi"}
+            value={preferredCity || userCity || ""}
+          />
+        </div>
+        <div className="field">
+          <label htmlFor="city">Filter to city</label>
+          <input id="city" onChange={(event) => setCity(event.target.value)} placeholder="Any city" value={city} />
         </div>
         <div className="field">
           <label htmlFor="specialization">Practice area</label>

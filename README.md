@@ -55,10 +55,29 @@ revision `0001_initial`, then baseline it and apply the integrity migration:
 Revision `0002_profile_integrity` aborts if a lawyer has more than one profile;
 resolve duplicates before applying it.
 
+## Render deployment
+
+The Docker runtime target starts Uvicorn and listens on Render's injected
+`PORT` (falling back to `8000` for local use). If deploying as a native Python
+web service instead of Docker, use:
+
+```text
+Build command: pip install -r requirements.txt
+Start command: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+```
+
+Do not use the test target or `pytest` as the web service's start command.
+Configure production environment variables such as `DATABASE_URL` and
+`SECRET_KEY` in Render, and run `alembic upgrade head` as a deployment
+pre-deploy command after backing up any valuable database.
+
 ## Authentication
 
 Register clients or lawyers at `/auth/register/client` and
-`/auth/register/lawyer`. Log in at `/auth/login` using OAuth2 form fields
+`/auth/register/lawyer`. Client registration stores a name, phone, city, and
+address, with CNIC optional. Lawyer registration stores contact information,
+practice city, office address, specialization, experience, and bar details.
+Log in at `/auth/login` using OAuth2 form fields
 (`username` is the email address). Access tokens are short-lived JWTs. Refresh
 tokens are stored as hashes, rotate on every `/auth/refresh` request, and are
 rejected after reuse. `POST /auth/logout` revokes the refresh-token family.
@@ -75,7 +94,8 @@ role during registration.
 
 The public marketplace is available at `GET /lawyers` and
 `GET /lawyers/{profile_id}`. It includes only active lawyer accounts with
-approved profiles. Search supports city, specialization, minimum/maximum years
+approved profiles. Pass `preferred_city` to rank lawyers in that city first;
+`city` remains an exact city filter. Search supports city, specialization, minimum/maximum years
 of experience, verification status, and pagination. Public results do not
 include CNIC, bar-council identifiers, or password hashes.
 Use the result's `user_id` as `lawyer_id` when creating an appointment;

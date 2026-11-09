@@ -12,6 +12,7 @@ export default function RegisterPage() {
   const [form, setForm] = useState({
     email: "",
     password: "",
+    confirm_password: "",
     phone: "",
     full_name: "",
     license_number: "",
@@ -19,7 +20,10 @@ export default function RegisterPage() {
     bar_council_number: "",
     cnic: "",
     city: "Karachi",
+    address: "",
+    office_address: "",
     specialization: "",
+    years_of_experience: "0",
   });
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -33,12 +37,16 @@ export default function RegisterPage() {
     event.preventDefault();
     setError("");
     setSuccess("");
+    if (form.password !== form.confirm_password) {
+      setError("Passwords do not match.");
+      return;
+    }
     setSubmitting(true);
     const payload: Record<string, string> = {
       email: form.email.trim().toLowerCase(),
       password: form.password,
     };
-    if (form.phone.trim()) payload.phone = form.phone.trim();
+    payload.phone = form.phone.trim();
     if (role === "lawyer") {
       Object.assign(payload, {
         full_name: form.full_name.trim(),
@@ -47,8 +55,17 @@ export default function RegisterPage() {
         bar_council_number: form.bar_council_number.trim(),
         cnic: form.cnic.trim(),
         city: form.city.trim(),
+        office_address: form.office_address.trim(),
+        specialization: form.specialization.trim(),
+        years_of_experience: form.years_of_experience,
       });
-      if (form.specialization.trim()) payload.specialization = form.specialization.trim();
+    } else {
+      Object.assign(payload, {
+        full_name: form.full_name.trim(),
+        city: form.city.trim(),
+        address: form.address.trim(),
+      });
+      if (form.cnic.trim()) payload.cnic = form.cnic.trim();
     }
 
     try {
@@ -111,6 +128,26 @@ export default function RegisterPage() {
               <option value="lawyer">Lawyer</option>
             </select>
           </div>
+          {role === "client" && (
+            <>
+              <div className="field">
+                <label htmlFor="full_name">Full name</label>
+                <input autoComplete="name" id="full_name" maxLength={200} onChange={(event) => setField("full_name", event.target.value)} required value={form.full_name} />
+              </div>
+              <div className="field">
+                <label htmlFor="city">City</label>
+                <input autoComplete="address-level2" id="city" maxLength={100} onChange={(event) => setField("city", event.target.value)} required value={form.city} />
+              </div>
+              <div className="field">
+                <label htmlFor="address">Address</label>
+                <textarea autoComplete="street-address" id="address" maxLength={500} onChange={(event) => setField("address", event.target.value)} required rows={3} value={form.address} />
+              </div>
+              <div className="field">
+                <label htmlFor="cnic">CNIC <span className="field-help">(optional)</span></label>
+                <input autoComplete="off" id="cnic" maxLength={32} onChange={(event) => setField("cnic", event.target.value)} value={form.cnic} />
+              </div>
+            </>
+          )}
           {role === "lawyer" && (
             <>
               <div className="field">
@@ -144,7 +181,17 @@ export default function RegisterPage() {
                 </div>
                 <div className="field">
                   <label htmlFor="specialization">Specialization</label>
-                  <input id="specialization" maxLength={200} onChange={(event) => setField("specialization", event.target.value)} value={form.specialization} />
+                  <input id="specialization" maxLength={200} onChange={(event) => setField("specialization", event.target.value)} required value={form.specialization} />
+                </div>
+              </div>
+              <div className="form-grid">
+                <div className="field">
+                  <label htmlFor="years_of_experience">Years of experience</label>
+                  <input id="years_of_experience" max={80} min={0} onChange={(event) => setField("years_of_experience", event.target.value)} required type="number" value={form.years_of_experience} />
+                </div>
+                <div className="field">
+                  <label htmlFor="office_address">Office address</label>
+                  <input autoComplete="street-address" id="office_address" maxLength={500} onChange={(event) => setField("office_address", event.target.value)} required value={form.office_address} />
                 </div>
               </div>
             </>
@@ -154,13 +201,17 @@ export default function RegisterPage() {
             <input autoComplete="email" id="email" onChange={(event) => setField("email", event.target.value)} required type="email" value={form.email} />
           </div>
           <div className="field">
-            <label htmlFor="phone">Phone number <span className="field-help">(optional)</span></label>
-            <input autoComplete="tel" id="phone" maxLength={32} onChange={(event) => setField("phone", event.target.value)} value={form.phone} />
+            <label htmlFor="phone">Phone number</label>
+            <input autoComplete="tel" id="phone" maxLength={32} onChange={(event) => setField("phone", event.target.value)} required value={form.phone} />
           </div>
           <div className="field">
             <label htmlFor="password">Password</label>
             <input autoComplete="new-password" id="password" maxLength={128} minLength={8} onChange={(event) => setField("password", event.target.value)} required type="password" value={form.password} />
             <span className="field-help">At least 8 characters, including uppercase, lowercase, and a number.</span>
+          </div>
+          <div className="field">
+            <label htmlFor="confirm_password">Confirm password</label>
+            <input autoComplete="new-password" id="confirm_password" maxLength={128} minLength={8} onChange={(event) => setField("confirm_password", event.target.value)} required type="password" value={form.confirm_password} />
           </div>
           {error && <div className="form-error" role="alert">{error}</div>}
           {success && <div className="form-success" role="status">{success}</div>}

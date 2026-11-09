@@ -7,9 +7,10 @@ from sqlalchemy.pool import StaticPool
 
 from app.core.config import settings
 from app.core.database import Base
-from app.api.auth import logout, refresh_tokens
+from app.api.auth import logout, refresh_tokens, register_client, register_lawyer
 from app.models.user import RefreshSession, User, UserRole
 from app.schemas.auth import RefreshTokenRequest
+from app.schemas.user import ClientRegisterRequest, LawyerRegisterRequest, UserResponse
 from app.services.admin_service import AdminService
 from app.services.auth_service import AuthService, InvalidTokenError
 
@@ -137,6 +138,51 @@ class RefreshSessionTests(unittest.TestCase):
             select(RefreshSession).where(RefreshSession.user_id == self.user.id)
         )
         self.assertIsNotNone(session.revoked_at)
+
+    def test_client_registration_persists_profile_without_exposing_private_fields(self) -> None:
+        payload = ClientRegisterRequest(
+            full_name="  Sara Ahmed ",
+            email="SARA@EXAMPLE.COM",
+            phone="+923001234567",
+            city=" Lahore ",
+            address="  Model Town ",
+            cnic="4210112345671",
+            password="SecurePass1",
+        )
+
+        user = register_client(payload, self.db)
+
+        self.assertEqual(user.full_name, "Sara Ahmed")
+        self.assertEqual(user.email, "sara@example.com")
+        self.assertEqual(user.city, "Lahore")
+        self.assertEqual(user.address, "Model Town")
+        self.assertEqual(user.cnic, "4210112345671")
+        response = UserResponse.model_validate(user)
+        self.assertNotIn("cnic", response.model_dump())
+        self.assertNotIn("address", response.model_dump())
+
+    def test_lawyer_registration_persists_experience_and_office_address(self) -> None:
+        payload = LawyerRegisterRequest(
+            email="lawyer-registration@example.com",
+            phone="+923001234568",
+            password="SecurePass1",
+            full_name="Ayesha Khan",
+            license_number="LIC-REG-1",
+            bar_council="Punjab Bar Council",
+            bar_council_number="BC-REG-1",
+            cnic="4210112345672",
+            city="Lahore",
+            specialization="Civil law",
+            years_of_experience=12,
+            office_address="Court Road",
+        )
+
+        user = register_lawyer(payload, self.db)
+
+        self.assertEqual(user.lawyer_profile.years_of_experience, 12)
+        self.assertEqual(user.lawyer_profile.office_address, "Court Road")
+        self.assertEqual(user.lawyer_profile.specialization, "Civil law")
+        self.assertEqual(user.lawyer_profile.city, "Lahore")
 
 
 if __name__ == "__main__":

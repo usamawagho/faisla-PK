@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from sqlalchemy import select
+from sqlalchemy import case, func, select
 from sqlalchemy.orm import Session
 
 from app.models.user import (
@@ -40,6 +40,7 @@ class LawyerProfileRepository:
         db: Session,
         *,
         city: str | None = None,
+        preferred_city: str | None = None,
         specialization: str | None = None,
         min_years_experience: int | None = None,
         max_years_experience: int | None = None,
@@ -75,8 +76,20 @@ class LawyerProfileRepository:
                 LawyerProfile.verification_status == verification_status
             )
 
+        ordering = []
+        if preferred_city:
+            ordering.append(
+                case(
+                    (
+                        func.lower(LawyerProfile.city) == preferred_city.strip().lower(),
+                        0,
+                    ),
+                    else_=1,
+                )
+            )
         statement = (
             statement.order_by(
+                *ordering,
                 LawyerProfile.years_of_experience.desc(),
                 LawyerProfile.id,
             )

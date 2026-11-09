@@ -21,6 +21,7 @@ MarketplaceService = Annotated[
 def search_lawyers(
     service: MarketplaceService,
     city: str | None = Query(default=None, min_length=1, max_length=100),
+    preferred_city: str | None = Query(default=None, min_length=1, max_length=100),
     specialization: str | None = Query(default=None, min_length=1, max_length=200),
     min_years_experience: int | None = Query(default=None, ge=0, le=80),
     max_years_experience: int | None = Query(default=None, ge=0, le=80),
@@ -39,6 +40,7 @@ def search_lawyers(
         )
     return service.search_public(
         city=city,
+        preferred_city=preferred_city,
         specialization=specialization,
         min_years_experience=min_years_experience,
         max_years_experience=max_years_experience,
