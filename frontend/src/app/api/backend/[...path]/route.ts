@@ -1,5 +1,10 @@
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
+import {
+  getBackendUrl,
+  logBackendFailure,
+  logBackendResponse,
+} from "@/lib/backend-api";
 import { isSameOrigin } from "@/lib/request-security";
 
 type RouteContext = { params: Promise<{ path: string[] }> };
@@ -23,14 +28,8 @@ async function proxy(request: NextRequest, context: RouteContext) {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get("faisla_access")?.value;
   const refreshToken = cookieStore.get("faisla_refresh")?.value;
-  const apiBase = (process.env.FAISLA_API_URL ?? "http://127.0.0.1:8000").replace(
-    /\/+$/,
-    "",
-  );
-  const target = new URL(
-    path.map((part) => encodeURIComponent(part)).join("/") + request.nextUrl.search,
-    `${apiBase}/`,
-  );
+  const target = getBackendUrl(path.map((part) => encodeURIComponent(part)).join(""));
+  target.search = request.nextUrl.search;
   const method = request.method;
   const body =
     method === "GET" || method === "HEAD"
@@ -50,23 +49,27 @@ async function proxy(request: NextRequest, context: RouteContext) {
       cache: "no-store",
       redirect: "manual",
     });
-  } catch {
+  } catch (error) {
+    logBackendFailure(`/api/backend/${path.join("/")}`, target, error);
     return NextResponse.json(
       { detail: "The Faisla API is unavailable. Try again shortly." },
       { status: 503 },
     );
   }
+  logBackendResponse(`/api/backend/${path.join("/")}`, target, upstream.status);
 
   let refreshedAccess: string | undefined;
   let refreshedRefresh: string | undefined;
   if (upstream.status === 401 && refreshToken && path.join("/") !== "auth/refresh") {
     try {
-      const refreshed = await fetch(`${apiBase}/auth/refresh`, {
+      const refreshTarget = getBackendUrl("/auth/refresh");
+      const refreshed = await fetch(refreshTarget, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ refresh_token: refreshToken }),
         cache: "no-store",
       });
+      logBackendResponse("/api/backend/auth/refresh", refreshTarget, refreshed.status);
       const tokens = (await refreshed.json().catch(() => null)) as
         | { access_token?: string; refresh_token?: string }
         | null;
@@ -86,7 +89,8 @@ async function proxy(request: NextRequest, context: RouteContext) {
           redirect: "manual",
         });
       }
-    } catch {
+    } catch (error) {
+      logBackendFailure("/api/backend/auth/refresh", undefined, error);
       refreshedAccess = undefined;
     }
   }

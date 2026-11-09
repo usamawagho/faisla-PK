@@ -171,8 +171,14 @@ configured.
 
 The Next.js 15 application is in `frontend/`. Install Node.js 20 LTS or later,
 then create `frontend/.env.local` from `.env.example` and set
-`FAISLA_API_URL` to the backend URL. Install dependencies and start the
-development server from that directory:
+`FAISLA_API_URL` to the backend URL. Local development defaults to
+`http://127.0.0.1:8000`; production requires the server-side `FAISLA_API_URL`
+to be set (for example, the public HTTPS URL of the Render API) and does not
+silently fall back to localhost. Set this variable in the Vercel project's
+Environment Variables for each deployment environment. It is not a
+`NEXT_PUBLIC_*` variable: requests are forwarded server-to-server through the
+Next.js API routes. Install dependencies and start the development server from
+that directory:
 
 ```powershell
 cd frontend

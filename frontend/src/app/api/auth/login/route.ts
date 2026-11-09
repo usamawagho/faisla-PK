@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
+import {
+  getBackendUrl,
+  logBackendFailure,
+  logBackendResponse,
+} from "@/lib/backend-api";
 import { isSameOrigin } from "@/lib/request-security";
-
-const apiUrl = process.env.FAISLA_API_URL ?? "http://127.0.0.1:8000";
 
 export async function POST(request: Request) {
   if (!isSameOrigin(request)) {
@@ -31,20 +34,24 @@ export async function POST(request: Request) {
     password: credentials.password,
   });
 
+  let target: URL | undefined;
   let upstream: Response;
   try {
-    upstream = await fetch(`${apiUrl.replace(/\/+$/, "")}/auth/login`, {
+    target = getBackendUrl("/auth/login");
+    upstream = await fetch(target, {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: form,
       cache: "no-store",
     });
-  } catch {
+  } catch (error) {
+    logBackendFailure("/api/auth/login", target, error);
     return NextResponse.json(
       { detail: "The Faisla API is unavailable. Try again shortly." },
       { status: 503 },
     );
   }
+  logBackendResponse("/api/auth/login", target, upstream.status);
 
   const payload = (await upstream.json().catch(() => null)) as
     | { access_token?: string; refresh_token?: string; detail?: string }

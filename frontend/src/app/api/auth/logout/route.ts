@@ -1,4 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
+import {
+  getBackendUrl,
+  logBackendFailure,
+  logBackendResponse,
+} from "@/lib/backend-api";
 import { isSameOrigin } from "@/lib/request-security";
 
 export async function POST(request: NextRequest) {
@@ -9,19 +14,19 @@ export async function POST(request: NextRequest) {
   const refreshToken = request.cookies.get("faisla_refresh")?.value;
   let logoutFailed = false;
   if (refreshToken) {
+    let target: URL | undefined;
     try {
-      const apiUrl = (process.env.FAISLA_API_URL ?? "http://127.0.0.1:8000").replace(
-        /\/+$/,
-        "",
-      );
-      const upstream = await fetch(`${apiUrl}/auth/logout`, {
+      target = getBackendUrl("/auth/logout");
+      const upstream = await fetch(target, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ refresh_token: refreshToken }),
         cache: "no-store",
       });
+      logBackendResponse("/api/auth/logout", target, upstream.status);
       logoutFailed = !upstream.ok && upstream.status !== 401;
-    } catch {
+    } catch (error) {
+      logBackendFailure("/api/auth/logout", target, error);
       logoutFailed = true;
     }
   }
