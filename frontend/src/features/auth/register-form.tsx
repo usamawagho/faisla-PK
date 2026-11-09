@@ -140,7 +140,17 @@ export default function RegisterPage() {
               </div>
               <div className="field">
                 <label htmlFor="address">Address</label>
-                <textarea autoComplete="street-address" id="address" maxLength={500} onChange={(event) => setField("address", event.target.value)} required rows={3} value={form.address} />
+                <textarea
+                  autoComplete="street-address"
+                  className="address-input"
+                  id="address"
+                  maxLength={500}
+                  onChange={(event) => setField("address", event.target.value)}
+                  placeholder="Street address, area, city"
+                  required
+                  rows={2}
+                  value={form.address}
+                />
               </div>
               <div className="field">
                 <label htmlFor="cnic">CNIC <span className="field-help">(optional)</span></label>

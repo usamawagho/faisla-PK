@@ -598,7 +598,7 @@ a {
 
 .field textarea {
   width: 100%;
-  min-height: 92px;
+  min-height: 80px;
   resize: vertical;
   border: 1px solid #dfe3dd;
   border-radius: 6px;
@@ -608,6 +608,10 @@ a {
   color: var(--ink);
   font: inherit;
   font-size: 13px;
+}
+
+.field textarea.address-input {
+  max-height: 120px;
 }
 
 .field textarea:focus {
