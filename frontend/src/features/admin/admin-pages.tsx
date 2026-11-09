@@ -8,14 +8,14 @@ import { humanize } from "@/features/shared/format";
 import type { AdminStats, AdminUser, PendingLawyer } from "@/types/workflows";
 
 export function AdminDashboardPage() {
-  const currentUser = useCurrentUser();
+  const currentUser = useCurrentUser("admin");
   const stats = useQuery({
     queryKey: ["admin-stats"],
     enabled: currentUser.data?.role === "admin",
     queryFn: async () => (await api.get<AdminStats>("/admin/dashboard")).data,
   });
   if (currentUser.isPending || !currentUser.data) return <div className="page-shell"><div className="loading-state">Loading platform overview...</div></div>;
-  if (currentUser.data.role !== "admin") return <div className="page-shell"><div className="error-state">Administrator access is required.</div></div>;
+  if (currentUser.data.role !== "admin") return <div className="page-shell"><div className="loading-state">Redirecting to your workspace...</div></div>;
   return <div className="page-shell">
     <div className="eyebrow">Platform administration</div><h1 className="page-title">Overview</h1>
     <p className="page-intro">Current platform totals from the Faisla API.</p>
@@ -33,7 +33,7 @@ export function AdminDashboardPage() {
 }
 
 export function AdminLawyersPage() {
-  const currentUser = useCurrentUser();
+  const currentUser = useCurrentUser("admin");
   const queryClient = useQueryClient();
   const [error, setError] = useState("");
   const lawyers = useQuery({
@@ -52,7 +52,7 @@ export function AdminLawyersPage() {
     }
   }
   if (currentUser.isPending || !currentUser.data) return <div className="page-shell"><div className="loading-state">Loading lawyer applications...</div></div>;
-  if (currentUser.data.role !== "admin") return <div className="page-shell"><div className="error-state">Administrator access is required.</div></div>;
+  if (currentUser.data.role !== "admin") return <div className="page-shell"><div className="loading-state">Redirecting to your workspace...</div></div>;
   return <div className="page-shell">
     <div className="eyebrow">Platform administration</div><h1 className="page-title">Lawyer verification</h1>
     <p className="page-intro">Review pending lawyer profiles before they appear in the public marketplace.</p>
@@ -71,7 +71,7 @@ export function AdminLawyersPage() {
 }
 
 export function AdminUsersPage() {
-  const currentUser = useCurrentUser();
+  const currentUser = useCurrentUser("admin");
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [requestError, setRequestError] = useState("");
@@ -96,7 +96,7 @@ export function AdminUsersPage() {
     }
   }
   if (currentUser.isPending || !currentUser.data) return <div className="page-shell"><div className="loading-state">Loading users...</div></div>;
-  if (currentUser.data.role !== "admin") return <div className="page-shell"><div className="error-state">Administrator access is required.</div></div>;
+  if (currentUser.data.role !== "admin") return <div className="page-shell"><div className="loading-state">Redirecting to your workspace...</div></div>;
   return <div className="page-shell">
     <div className="eyebrow">Platform administration</div><h1 className="page-title">Users</h1>
     <p className="page-intro">Find accounts and manage access. Your own administrator account cannot be deactivated here.</p>

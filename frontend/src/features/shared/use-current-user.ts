@@ -5,9 +5,15 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import { useAuthStore } from "@/lib/auth-store";
-import type { User } from "@/types/api";
+import type { User, UserRole } from "@/types/api";
 
-export function useCurrentUser() {
+function roleHome(role: UserRole) {
+  if (role === "admin") return "/admin/dashboard";
+  if (role === "lawyer") return "/portal";
+  return "/dashboard";
+}
+
+export function useCurrentUser(requiredRole?: UserRole) {
   const router = useRouter();
   const setUser = useAuthStore((state) => state.setUser);
   const query = useQuery({
@@ -23,6 +29,12 @@ export function useCurrentUser() {
   useEffect(() => {
     if (query.isError) router.replace("/login");
   }, [query.isError, router]);
+
+  useEffect(() => {
+    if (query.data && requiredRole && query.data.role !== requiredRole) {
+      router.replace(roleHome(query.data.role));
+    }
+  }, [query.data, requiredRole, router]);
 
   return query;
 }
